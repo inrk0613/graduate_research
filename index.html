@@ -9,254 +9,310 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
             background-color: #f7f8fa;
         }
-        .dark body {
-            background-color: #0d1117;
-        }
+        .dark body { background-color: #0d1117; }
         .task-item.completed .task-text {
             text-decoration: line-through;
             color: #6b7280;
         }
-        /* スクロールバーのスタイル */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .calendar-day.has-tasks::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background-color: #3b82f6;
+            border-radius: 50%;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .calendar-day.is-today {
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 50%;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #a8a8a8;
-            border-radius: 4px;
+         .calendar-day.is-today.has-tasks::after{
+            background-color: white;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #888;
-        }
-        /* アコーディオンのアイコン */
-        .accordion-icon {
-            transition: transform 0.3s ease;
-        }
-        details[open] .accordion-icon {
-            transform: rotate(90deg);
+        .calendar-day.is-selected {
+            background-color: #1d4ed8;
+            color: white;
+            border-radius: 50%;
         }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200">
-    <div class="container mx-auto p-4 md:p-6 lg:p-8 max-w-6xl">
+    <div class="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         
-        <!-- ヘッダー -->
-        <header class="mb-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">卒業研究プロジェクト管理</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">ロゴデザインの定量的評価とブランド価値に関する研究</p>
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-300 mt-2 sm:mt-0">
-                    井口 陸さん
-                </div>
-            </div>
+        <header class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">卒業研究プロジェクト管理</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">井口 陸さん | ロゴデザインの定量的評価とブランド価値に関する研究</p>
         </header>
 
-        <!-- 進捗状況 -->
-        <div class="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
-            <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">プロジェクト全体の進捗</h2>
-            <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
-                <div id="progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
-            </div>
-            <p id="progress-text" class="text-center mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">0% 完了</p>
-        </div>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left: Calendar & Progress -->
+            <aside class="lg:w-1/3 xl:w-1/4">
+                <div class="sticky top-6">
+                    <div class="mb-6 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+                        <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">プロジェクト進捗</h2>
+                        <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
+                            <div id="progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                        </div>
+                        <p id="progress-text" class="text-center mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">0% 完了</p>
+                    </div>
 
-        <!-- タスクリスト -->
-        <main id="task-container" class="space-y-6">
-            <!-- タスクはここに動的に生成されます -->
-        </main>
+                    <div id="calendar-container" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 space-y-4">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right: Task List -->
+            <main class="flex-1">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 id="task-list-title" class="text-xl font-bold text-gray-900 dark:text-white">今後のタスク</h2>
+                    <div class="flex space-x-2">
+                        <button id="filter-all" class="px-3 py-1 text-sm font-semibold text-white bg-blue-600 rounded-full shadow-sm hover:bg-blue-700">全タスク</button>
+                    </div>
+                </div>
+                <div id="task-container" class="space-y-3">
+                    <!-- Tasks will be generated here -->
+                </div>
+            </main>
+        </div>
 
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 研究計画書から細分化したタスクデータ
-            const initialTasks = [
-                // フェーズ1: 準備・開発 (3週間)
-                { id: 101, phase: 1, week: 1, text: 'Interbrand "Best Global Brands 100" のリストとロゴ画像収集', completed: true, dueDate: '〜10/5' },
-                { id: 102, phase: 1, week: 1, text: 'Interbrand "Best Japan Brands" のリストとロゴ画像収集', completed: true, dueDate: '〜10/5' },
-                { id: 103, phase: 1, week: 1, text: 'Python開発環境の構築 (Anaconda, VSCodeなど)', completed: true, dueDate: '〜10/5' },
-                { id: 104, phase: 1, week: 1, text: '必要ライブラリのインストール (OpenCV, NumPy, scikit-image, Pandas, Matplotlib)', completed: true, dueDate: '〜10/5' },
-                { id: 105, phase: 1, week: 1, text: 'データ保存用のフォルダ構成を決定', completed: false, dueDate: '〜10/5' },
-                { id: 106, phase: 1, week: 2, text: '機能①：ロゴ画像の前処理（グレースケール化、二値化）関数の実装', completed: false, dueDate: '〜10/12' },
-                { id: 107, phase: 1, week: 2, text: '機能①：輪郭抽出ロジックの実装 (findContours)', completed: false, dueDate: '〜10/12' },
-                { id: 108, phase: 1, week: 2, text: '機能①：数値微分による曲率計算アルゴリズムの実装', completed: false, dueDate: '〜10/12' },
-                { id: 109, phase: 1, week: 2, text: '機能①：「平均曲率スコア」機能の完成と単体テスト', completed: false, dueDate: '〜10/12' },
-                { id: 110, phase: 1, week: 3, text: '機能②：色空間変換（RGB→HSV）と色相データ抽出機能の実装', completed: false, dueDate: '〜10/19' },
-                { id: 111, phase: 1, week: 3, text: '機能②：「色相の標準偏差」機能の完成と単体テスト', completed: false, dueDate: '〜10/19' },
-                { id: 112, phase: 1, week: 3, text: '機能③：グレースケール化と輝度ヒストグラム作成機能の実装', completed: false, dueDate: '〜10/19' },
-                { id: 113, phase: 1, week: 3, text: '機能③：シャノン・エントロピー計算機能の完成と単体テスト', completed: false, dueDate: '〜10/19' },
-                { id: 114, phase: 1, week: 3, text: '全機能（①, ②, ③）を統合したメイン分析スクリプトの作成', completed: false, dueDate: '〜10/19' },
-                { id: 115, phase: 1, week: 3, text: '【成果物】分析スクリプトの完成 (v1.0)', completed: false, dueDate: '〜10/19' },
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialTasks = [
+            // フェーズ1: 準備・開発 (3週間)
+            { id: 101, phase: 1, week: 1, text: 'Interbrand "Best Global Brands 100" のリストとロゴ画像収集', completed: true, dueDate: '2025-10-05' },
+            { id: 102, phase: 1, week: 1, text: 'Interbrand "Best Japan Brands" のリストとロゴ画像収集', completed: true, dueDate: '2025-10-05' },
+            { id: 103, phase: 1, week: 1, text: 'Python開発環境の構築 (Anaconda, VSCodeなど)', completed: true, dueDate: '2025-10-05' },
+            { id: 104, phase: 1, week: 1, text: '必要ライブラリのインストール (OpenCV, NumPy, scikit-image, Pandas, Matplotlib)', completed: true, dueDate: '2025-10-05' },
+            { id: 105, phase: 1, week: 1, text: 'データ保存用のフォルダ構成を決定', completed: false, dueDate: '2025-10-05' },
+            { id: 106, phase: 1, week: 2, text: '機能①：ロゴ画像の前処理（グレースケール化、二値化）関数の実装', completed: false, dueDate: '2025-10-12' },
+            { id: 107, phase: 1, week: 2, text: '機能①：輪郭抽出ロジックの実装 (findContours)', completed: false, dueDate: '2025-10-12' },
+            { id: 108, phase: 1, week: 2, text: '機能①：数値微分による曲率計算アルゴリズムの実装', completed: false, dueDate: '2025-10-12' },
+            { id: 109, phase: 1, week: 2, text: '機能①：「平均曲率スコア」機能の完成と単体テスト', completed: false, dueDate: '2025-10-12' },
+            { id: 110, phase: 1, week: 3, text: '機能②：色空間変換（RGB→HSV）と色相データ抽出機能の実装', completed: false, dueDate: '2025-10-19' },
+            { id: 111, phase: 1, week: 3, text: '機能②：「色相の標準偏差」機能の完成と単体テスト', completed: false, dueDate: '2025-10-19' },
+            { id: 112, phase: 1, week: 3, text: '機能③：グレースケール化と輝度ヒストグラム作成機能の実装', completed: false, dueDate: '2025-10-19' },
+            { id: 113, phase: 1, week: 3, text: '機能③：シャノン・エントロピー計算機能の完成と単体テスト', completed: false, dueDate: '2025-10-19' },
+            { id: 114, phase: 1, week: 3, text: '全機能（①, ②, ③）を統合したメイン分析スクリプトの作成', completed: false, dueDate: '2025-10-19' },
+            { id: 115, phase: 1, week: 3, text: '【成果物】分析スクリプトの完成 (v1.0)', completed: false, dueDate: '2025-10-19' },
+            { id: 201, phase: 2, week: 4, text: '全ロゴデータ（Global & Japan）に対して分析スクリプトを実行', completed: false, dueDate: '2025-10-26' },
+            { id: 202, phase: 2, week: 4, text: '3指標の記述統計量（平均、中央値、標準偏差など）を算出', completed: false, dueDate: '2025-10-26' },
+            { id: 203, phase: 2, week: 4, text: '各指標のヒストグラムを作成し、分布を可視化', completed: false, dueDate: '2025-10-26' },
+            { id: 204, phase: 2, week: 4, text: '主分析：ブランド順位と各指標間のピアソン相関係数を算出', completed: false, dueDate: '2025-10-26' },
+            { id: 205, phase: 2, week: 4, text: '頑健性チェック1：主要業種（テクノロジー、自動車）で相関分析', completed: false, dueDate: '2025-10-26' },
+            { id: 206, phase: 2, week: 4, text: '頑健性チェック2：日本データで相関分析', completed: false, dueDate: '2025-10-26' },
+            { id: 207, phase: 2, week: 4, text: '【成果物】全分析作業の完了、結果をまとめた表とグラフを作成', completed: false, dueDate: '2025-10-26' },
+            { id: 208, phase: 2, week: 5, text: '論文執筆：序論（研究背景、問題意識、理論的フレームワーク、RQ）', completed: false, dueDate: '2025-11-02' },
+            { id: 209, phase: 2, week: 5, text: '論文執筆：第2章 研究手法（全体像、データ収集方法）', completed: false, dueDate: '2025-11-02' },
+            { id: 210, phase: 2, week: 5, text: '論文執筆：第3章 ソフトウェア開発（開発環境、各指標の理論と実装）', completed: false, dueDate: '2025-11-02' },
+            { id: 211, phase: 2, week: 6, text: '論文執筆：第4章 分析結果（記述統計、仮説検証の結果を記述）', completed: false, dueDate: '2025-11-09' },
+            { id: 212, phase: 2, week: 6, text: '論文執筆：第5章 考察（分析結果の解釈、理論的・実務的含意）', completed: false, dueDate: '2025-11-09' },
+            { id: 213, phase: 2, week: 7, text: '論文執筆：結論（研究のまとめ、限界、今後の展望）', completed: false, dueDate: '2025-11-16' },
+            { id: 214, phase: 2, week: 7, text: '論文全体の構成を見直し、推敲', completed: false, dueDate: '2025-11-16' },
+            { id: 215, phase: 2, week: 7, text: '参考文献リストの作成', completed: false, dueDate: '2025-11-16' },
+            { id: 216, phase: 2, week: 7, text: '【成果物】論文初稿（Ver.1）の完成 & 研究題目を正式提出', completed: false, dueDate: '2025-11-16' },
+            { id: 217, phase: 2, week: 8, text: '指導教員へ初稿を提出し、フィードバックを依頼', completed: false, dueDate: '2025-11-23' },
+            { id: 218, phase: 2, week: 8, text: '指導教員からのフィードバックを受領し、内容を整理', completed: false, dueDate: '2025-11-23' },
+            { id: 301, phase: 3, week: 9, text: '指導教員のFBに基づき、論文全体を大幅に修正・改善', completed: false, dueDate: '2025-11-30' },
+            { id: 302, phase: 3, week: 9, text: '論理構成の矛盾点などを解消', completed: false, dueDate: '2025-11-30' },
+            { id: 303, phase: 3, week: 9, text: '【成果物】論文第2稿の完成', completed: false, dueDate: '2025-11-30' },
+            { id: 304, phase: 3, week: 10, text: '指導教員と第2稿についてディスカッション', completed: false, dueDate: '2025-12-14' },
+            { id: 305, phase: 3, week: 10, text: '必要に応じて追加分析を実施', completed: false, dueDate: '2025-12-14' },
+            { id: 306, phase: 3, week: 11, text: '考察をさらに深化させる', completed: false, dueDate: '2025-12-14' },
+            { id: 307, phase: 3, week: 11, text: '図表のデザインやキャプションを最終化', completed: false, dueDate: '2025-12-14' },
+            { id: 308, phase: 3, week: 11, text: '誤字脱字のセルフチェック（最低3回）', completed: false, dueDate: '2025-12-14' },
+            { id: 309, phase: 3, week: 11, text: '【目標】「いつでも提出できる状態」にする', completed: false, dueDate: '2025-12-14' },
+            { id: 401, phase: 4, week: 12, text: '予備期間：遅延のキャッチアップ・体調管理', completed: false, dueDate: '2026-01-11' },
+            { id: 402, phase: 4, week: 13, text: '予備期間：卒論発表会の構成案を検討', completed: false, dueDate: '2026-01-11' },
+            { id: 403, phase: 4, week: 14, text: '予備期間：年末年始休暇', completed: false, dueDate: '2026-01-11' },
+            { id: 404, phase: 4, week: 15, text: '提出フォーマットの最終確認', completed: false, dueDate: '2026-01-18' },
+            { id: 405, phase: 4, week: 15, text: '論文PDFの生成とチェック', completed: false, dueDate: '2026-01-18' },
+            { id: 406, phase: 4, week: 15, text: 'ソースコードのZIPファイル準備', completed: false, dueDate: '2026-01-18' },
+            { id: 407, phase: 4, week: 15, text: '【最重要】卒業論文・ソースコードを提出', completed: false, dueDate: '2026-01-18' },
+            { id: 408, phase: 4, week: 16, text: '卒論審査会（発表会）の発表スライド作成', completed: false, dueDate: '2026-01-25' },
+            { id: 409, phase: 4, week: 16, text: '発表原稿の作成と暗記', completed: false, dueDate: '2026-01-25' },
+            { id: 410, phase: 4, week: 16, text: '発表練習（タイム計測）', completed: false, dueDate: '2026-01-25' },
+        ];
 
-                // フェーズ2: 分析・執筆 (5週間)
-                { id: 201, phase: 2, week: 4, text: '全ロゴデータ（Global & Japan）に対して分析スクリプトを実行', completed: false, dueDate: '〜10/26' },
-                { id: 202, phase: 2, week: 4, text: '3指標の記述統計量（平均、中央値、標準偏差など）を算出', completed: false, dueDate: '〜10/26' },
-                { id: 203, phase: 2, week: 4, text: '各指標のヒストグラムを作成し、分布を可視化', completed: false, dueDate: '〜10/26' },
-                { id: 204, phase: 2, week: 4, text: '主分析：ブランド順位と各指標間のピアソン相関係数を算出', completed: false, dueDate: '〜10/26' },
-                { id: 205, phase: 2, week: 4, text: '頑健性チェック1：主要業種（テクノロジー、自動車）で相関分析', completed: false, dueDate: '〜10/26' },
-                { id: 206, phase: 2, week: 4, text: '頑健性チェック2：日本データで相関分析', completed: false, dueDate: '〜10/26' },
-                { id: 207, phase: 2, week: 4, text: '【成果物】全分析作業の完了、結果をまとめた表とグラフを作成', completed: false, dueDate: '〜10/26' },
-                { id: 208, phase: 2, week: 5, text: '論文執筆：序論（研究背景、問題意識、理論的フレームワーク、RQ）', completed: false, dueDate: '〜11/2' },
-                { id: 209, phase: 2, week: 5, text: '論文執筆：第2章 研究手法（全体像、データ収集方法）', completed: false, dueDate: '〜11/2' },
-                { id: 210, phase: 2, week: 5, text: '論文執筆：第3章 ソフトウェア開発（開発環境、各指標の理論と実装）', completed: false, dueDate: '〜11/2' },
-                { id: 211, phase: 2, week: 6, text: '論文執筆：第4章 分析結果（記述統計、仮説検証の結果を記述）', completed: false, dueDate: '〜11/9' },
-                { id: 212, phase: 2, week: 6, text: '論文執筆：第5章 考察（分析結果の解釈、理論的・実務的含意）', completed: false, dueDate: '〜11/9' },
-                { id: 213, phase: 2, week: 7, text: '論文執筆：結論（研究のまとめ、限界、今後の展望）', completed: false, dueDate: '〜11/16' },
-                { id: 214, phase: 2, week: 7, text: '論文全体の構成を見直し、推敲', completed: false, dueDate: '〜11/16' },
-                { id: 215, phase: 2, week: 7, text: '参考文献リストの作成', completed: false, dueDate: '〜11/16' },
-                { id: 216, phase: 2, week: 7, text: '【成果物】論文初稿（Ver.1）の完成 & 研究題目を正式提出', completed: false, dueDate: '〜11/16' },
-                { id: 217, phase: 2, week: 8, text: '指導教員へ初稿を提出し、フィードバックを依頼', completed: false, dueDate: '〜11/23' },
-                { id: 218, phase: 2, week: 8, text: '指導教員からのフィードバックを受領し、内容を整理', completed: false, dueDate: '〜11/23' },
+        let tasks = [];
+        let currentFilter = 'upcoming'; // 'upcoming', 'all', or a date string 'YYYY-MM-DD'
+        let selectedDate = null;
 
-                // フェーズ3: 推敲・最終化 (3週間)
-                { id: 301, phase: 3, week: 9, text: '指導教員のFBに基づき、論文全体を大幅に修正・改善', completed: false, dueDate: '〜11/30' },
-                { id: 302, phase: 3, week: 9, text: '論理構成の矛盾点などを解消', completed: false, dueDate: '〜11/30' },
-                { id: 303, phase: 3, week: 9, text: '【成果物】論文第2稿の完成', completed: false, dueDate: '〜11/30' },
-                { id: 304, phase: 3, week: 10, text: '指導教員と第2稿についてディスカッション', completed: false, dueDate: '〜12/14' },
-                { id: 305, phase: 3, week: 10, text: '必要に応じて追加分析を実施', completed: false, dueDate: '〜12/14' },
-                { id: 306, phase: 3, week: 11, text: '考察をさらに深化させる', completed: false, dueDate: '〜12/14' },
-                { id: 307, phase: 3, week: 11, text: '図表のデザインやキャプションを最終化', completed: false, dueDate: '〜12/14' },
-                { id: 308, phase: 3, week: 11, text: '誤字脱字のセルフチェック（最低3回）', completed: false, dueDate: '〜12/14' },
-                { id: 309, phase: 3, week: 11, text: '【目標】「いつでも提出できる状態」にする', completed: false, dueDate: '〜12/14' },
+        const taskContainer = document.getElementById('task-container');
+        const taskListTitle = document.getElementById('task-list-title');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const calendarContainer = document.getElementById('calendar-container');
 
-                // フェーズ4: 予備・提出 (4週間)
-                { id: 401, phase: 4, week: 12, text: '予備期間：遅延のキャッチアップ・体調管理', completed: false, dueDate: '〜1/11' },
-                { id: 402, phase: 4, week: 13, text: '予備期間：卒論発表会の構成案を検討', completed: false, dueDate: '〜1/11' },
-                { id: 403, phase: 4, week: 14, text: '予備期間：年末年始休暇', completed: false, dueDate: '〜1/11' },
-                { id: 404, phase: 4, week: 15, text: '提出フォーマットの最終確認', completed: false, dueDate: '〜1/18' },
-                { id: 405, phase: 4, week: 15, text: '論文PDFの生成とチェック', completed: false, dueDate: '〜1/18' },
-                { id: 406, phase: 4, week: 15, text: 'ソースコードのZIPファイル準備', completed: false, dueDate: '〜1/18' },
-                { id: 407, phase: 4, week: 15, text: '【最重要】卒業論文・ソースコードを提出', completed: false, dueDate: '〜1/18' },
-                { id: 408, phase: 4, week: 16, text: '卒論審査会（発表会）の発表スライド作成', completed: false, dueDate: '〜1/25' },
-                { id: 409, phase: 4, week: 16, text: '発表原稿の作成と暗記', completed: false, dueDate: '〜1/25' },
-                { id: 410, phase: 4, week: 16, text: '発表練習（タイム計測）', completed: false, dueDate: '〜1/25' },
+        // --- Data handling ---
+        const loadTasks = () => {
+            const savedTasks = localStorage.getItem('graduationThesisTasks');
+            tasks = savedTasks ? JSON.parse(savedTasks) : initialTasks;
+        };
+
+        const saveTasks = () => {
+            localStorage.setItem('graduationThesisTasks', JSON.stringify(tasks));
+        };
+
+        // --- Calendar rendering ---
+        const generateCalendar = (year, month) => {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const monthDate = new Date(year, month);
+            const taskDueDates = tasks.map(t => t.dueDate);
+
+            let calendarHTML = `<div class="text-center font-bold mb-2">${year}年 ${month + 1}月</div>`;
+            calendarHTML += '<div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-2"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>';
+            calendarHTML += '<div class="grid grid-cols-7 gap-1">';
+
+            const firstDay = monthDate.getDay();
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div></div>';
+            }
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDate = new Date(year, month, day);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                let classes = 'calendar-day relative flex items-center justify-center h-8 w-8 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-700 rounded-full transition-colors';
+                if (taskDueDates.includes(dateStr)) classes += ' has-tasks';
+                if (currentDate.getTime() === today.getTime()) classes += ' is-today';
+                if (dateStr === selectedDate) classes += ' is-selected';
+                
+                calendarHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
+            }
+            calendarHTML += '</div>';
+            return calendarHTML;
+        };
+
+        const renderAllCalendars = () => {
+            calendarContainer.innerHTML = '';
+            const monthsToRender = [
+                { year: 2025, month: 8 }, // 9月
+                { year: 2025, month: 9 }, // 10月
+                { year: 2025, month: 10 },// 11月
+                { year: 2025, month: 11 },// 12月
+                { year: 2026, month: 0 },  // 1月
             ];
-            
-            const phaseInfo = {
-                1: { title: "フェーズ1: 準備・開発", duration: "3週間 (9/29〜)", icon: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.5h3.834a2.25 2.25 0 002.25-2.25V11.812a2.25 2.25 0 00-2.25-2.25h-4.5a2.25 2.25 0 00-2.25 2.25v3.834a2.25 2.25 0 002.25 2.25z' },
-                2: { title: "フェーズ2: 分析・執筆", duration: "5週間 (10/20〜)", icon: 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10' },
-                3: { title: "フェーズ3: 推敲・最終化", duration: "3週間 (11/24〜)", icon: 'M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25L3 10.125' },
-                4: { title: "フェーズ4: 予備・提出", duration: "4週間 (12/15〜)", icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
-            };
+            monthsToRender.forEach(m => {
+                const monthDiv = document.createElement('div');
+                monthDiv.innerHTML = generateCalendar(m.year, m.month);
+                calendarContainer.appendChild(monthDiv);
+            });
+        };
 
-            let tasks = [];
+        // --- Task rendering ---
+        const renderTasks = () => {
+            const todayStr = new Date().toISOString().split('T')[0];
+            let tasksToRender;
 
-            const taskContainer = document.getElementById('task-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-
-            function loadTasks() {
-                const savedTasks = localStorage.getItem('graduationThesisTasks');
-                tasks = savedTasks ? JSON.parse(savedTasks) : initialTasks;
+            if (currentFilter === 'all') {
+                tasksToRender = tasks;
+                taskListTitle.textContent = 'すべてのタスク';
+            } else if (currentFilter === 'upcoming') {
+                tasksToRender = tasks.filter(t => !t.completed && t.dueDate >= todayStr).sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+                taskListTitle.textContent = '今後のタスク';
+            } else { // Date filter
+                tasksToRender = tasks.filter(t => t.dueDate === currentFilter);
+                const d = new Date(currentFilter);
+                taskListTitle.textContent = `${d.getMonth()+1}月${d.getDate()+1}日のタスク`;
             }
 
-            function saveTasks() {
-                localStorage.setItem('graduationThesisTasks', JSON.stringify(tasks));
+            taskContainer.innerHTML = '';
+            if(tasksToRender.length === 0){
+                 taskContainer.innerHTML = `<div class="text-center py-10 text-gray-500">タスクはありません。</div>`;
+                 return;
             }
 
-            function renderTasks() {
-                taskContainer.innerHTML = '';
-                
-                const tasksByPhase = tasks.reduce((acc, task) => {
-                    (acc[task.phase] = acc[task.phase] || []).push(task);
-                    return acc;
-                }, {});
+            tasksToRender.forEach(task => {
+                const item = document.createElement('div');
+                item.className = `task-item flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] ${task.completed ? 'completed' : ''}`;
+                item.dataset.id = task.id;
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="h-6 w-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center mr-4 transition-all duration-200 ${task.completed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-gray-500'}">
+                            ${task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                        </div>
+                        <div>
+                            <span class="task-text text-sm text-gray-800 dark:text-gray-200">${task.text}</span>
+                            <div class="text-xs text-gray-400 dark:text-gray-500 font-mono">${task.dueDate}</div>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="task-${task.id}" class="hidden" ${task.completed ? 'checked' : ''}>
+                `;
+                taskContainer.appendChild(item);
+            });
+        };
 
-                Object.keys(tasksByPhase).forEach(phaseKey => {
-                    const weekGroups = tasksByPhase[phaseKey].reduce((acc, task) => {
-                        (acc[task.week] = acc[task.week] || []).push(task);
-                        return acc;
-                    }, {});
-
-                    const phaseElement = document.createElement('section');
-                    phaseElement.className = 'bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm overflow-hidden';
-                    
-                    let phaseContentHTML = '';
-                    Object.keys(weekGroups).forEach(weekKey => {
-                        const weekTasks = weekGroups[weekKey];
-                        const weekTasksHTML = weekTasks.map(task => `
-                            <li class="task-item flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] ${task.completed ? 'completed' : ''}" data-id="${task.id}">
-                                <div class="flex items-center">
-                                    <div class="h-6 w-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center mr-4 transition-all duration-200 ${task.completed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-gray-500'}">
-                                        ${task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                                    </div>
-                                    <span class="task-text text-sm text-gray-800 dark:text-gray-200">${task.text}</span>
-                                </div>
-                                <span class="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:block">${task.dueDate}</span>
-                                <input type="checkbox" id="task-${task.id}" class="hidden" ${task.completed ? 'checked' : ''}>
-                            </li>
-                        `).join('');
-                        
-                        phaseContentHTML += `
-                            <div class="mb-4">
-                                <h4 class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400">第${weekKey}週</h4>
-                                <ul class="mt-2 space-y-2 px-2">
-                                    ${weekTasksHTML}
-                                </ul>
-                            </div>`;
-                    });
-
-                    phaseElement.innerHTML = `
-                        <details class="group" ${phaseKey == '1' ? 'open' : ''}>
-                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none bg-gray-50 dark:bg-slate-800/80 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors duration-200">
-                                <div class="flex items-center">
-                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${phaseInfo[phaseKey].icon}"></path></svg>
-                                    <div class="ml-4">
-                                        <h3 class="text-md sm:text-lg font-bold text-gray-900 dark:text-white">${phaseInfo[phaseKey].title}</h3>
-                                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">${phaseInfo[phaseKey].duration}</p>
-                                    </div>
-                                </div>
-                                <svg class="w-5 h-5 accordion-icon text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            </summary>
-                            <div class="p-2 md:p-4 accordion-content">
-                                ${phaseContentHTML}
-                            </div>
-                        </details>
-                    `;
-                    taskContainer.appendChild(phaseElement);
-                });
-
-                addEventListeners();
-                updateProgress();
-            }
-
-            function updateProgress() {
-                const completedTasks = tasks.filter(task => task.completed).length;
-                const totalTasks = tasks.length;
-                const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                
-                progressBar.style.width = `${percentage}%`;
-                progressText.textContent = `${percentage}% 完了 (${completedTasks}/${totalTasks})`;
-            }
-
-            function addEventListeners() {
-                taskContainer.querySelectorAll('.task-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const taskId = parseInt(item.dataset.id, 10);
-                        const task = tasks.find(t => t.id === taskId);
-                        if (task) {
-                            task.completed = !task.completed;
-                            saveTasks();
-                            renderTasks();
-                        }
-                    });
-                });
-            }
-
-            loadTasks();
+        // --- Progress update ---
+        const updateProgress = () => {
+            const completed = tasks.filter(t => t.completed).length;
+            const total = tasks.length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}% 完了 (${completed}/${total})`;
+        };
+        
+        // --- Main update function ---
+        const updateView = () => {
+            updateProgress();
+            renderAllCalendars();
             renderTasks();
-        });
+            addEventListeners();
+        };
+
+        // --- Event Listeners ---
+        const addEventListeners = () => {
+            // Task click
+            taskContainer.querySelectorAll('.task-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const taskId = parseInt(item.dataset.id);
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = !task.completed;
+                        saveTasks();
+                        updateView();
+                    }
+                });
+            });
+
+            // Calendar day click
+            calendarContainer.querySelectorAll('.calendar-day').forEach(day => {
+                day.addEventListener('click', () => {
+                    selectedDate = day.dataset.date;
+                    currentFilter = selectedDate;
+                    updateView();
+                });
+            });
+
+            // Filter button
+            document.getElementById('filter-all').addEventListener('click', () => {
+                selectedDate = null;
+                currentFilter = 'all';
+                updateView();
+            });
+            taskListTitle.addEventListener('click', () => { // Title click resets to upcoming
+                 selectedDate = null;
+                 currentFilter = 'upcoming';
+                 updateView();
+            });
+        };
+
+        // --- Initial Load ---
+        loadTasks();
+        updateView();
+    });
     </script>
 </body>
 </html>
