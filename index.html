@@ -9,14 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f7f8fa;
         }
-        .task-item:hover {
-            background-color: #f8f9fa;
+        .dark body {
+            background-color: #0d1117;
         }
-        .task-item.completed label {
+        .task-item.completed .task-text {
             text-decoration: line-through;
             color: #6b7280;
         }
@@ -28,33 +31,30 @@
             background: #f1f1f1;
         }
         ::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #a8a8a8;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #888;
         }
         /* アコーディオンのアイコン */
         .accordion-icon {
             transition: transform 0.3s ease;
-        }
-        .accordion-content.hidden {
-            display: none;
         }
         details[open] .accordion-icon {
             transform: rotate(90deg);
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-6xl">
+<body class="bg-slate-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200">
+    <div class="container mx-auto p-4 md:p-6 lg:p-8 max-w-6xl">
         
         <!-- ヘッダー -->
         <header class="mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white">卒業研究プロジェクト管理</h1>
-                    <p class="text-gray-500 dark:text-gray-400 mt-1">認知心理学理論に基づくロゴデザインの定量的評価とブランド価値に関する研究</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">卒業研究プロジェクト管理</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">ロゴデザインの定量的評価とブランド価値に関する研究</p>
                 </div>
                 <div class="text-sm text-gray-600 dark:text-gray-300 mt-2 sm:mt-0">
                     井口 陸さん
@@ -63,9 +63,9 @@
         </header>
 
         <!-- 進捗状況 -->
-        <div class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-md">
-            <h2 class="text-lg font-semibold mb-3">プロジェクト全体の進捗</h2>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+        <div class="mb-8 p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm">
+            <h2 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">プロジェクト全体の進捗</h2>
+            <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
                 <div id="progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
             </div>
             <p id="progress-text" class="text-center mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">0% 完了</p>
@@ -144,7 +144,7 @@
             ];
             
             const phaseInfo = {
-                1: { title: "フェーズ1: 準備・開発", duration: "3週間 (9/29〜)", icon: ' M3.75 13.5l10.5-7.5 10.5 7.5M4.5 10.125v6.375a1.875 1.875 0 001.875 1.875h11.25a1.875 1.875 0 001.875-1.875v-6.375' },
+                1: { title: "フェーズ1: 準備・開発", duration: "3週間 (9/29〜)", icon: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.5h3.834a2.25 2.25 0 002.25-2.25V11.812a2.25 2.25 0 00-2.25-2.25h-4.5a2.25 2.25 0 00-2.25 2.25v3.834a2.25 2.25 0 002.25 2.25z' },
                 2: { title: "フェーズ2: 分析・執筆", duration: "5週間 (10/20〜)", icon: 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10' },
                 3: { title: "フェーズ3: 推敲・最終化", duration: "3週間 (11/24〜)", icon: 'M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25L3 10.125' },
                 4: { title: "フェーズ4: 予備・提出", duration: "4週間 (12/15〜)", icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }
@@ -156,20 +156,17 @@
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
 
-            // 1. データのロード
             function loadTasks() {
                 const savedTasks = localStorage.getItem('graduationThesisTasks');
                 tasks = savedTasks ? JSON.parse(savedTasks) : initialTasks;
             }
 
-            // 2. データのセーブ
             function saveTasks() {
                 localStorage.setItem('graduationThesisTasks', JSON.stringify(tasks));
             }
 
-            // 3. タスクの描画
             function renderTasks() {
-                taskContainer.innerHTML = ''; // コンテナをクリア
+                taskContainer.innerHTML = '';
                 
                 const tasksByPhase = tasks.reduce((acc, task) => {
                     (acc[task.phase] = acc[task.phase] || []).push(task);
@@ -177,30 +174,34 @@
                 }, {});
 
                 Object.keys(tasksByPhase).forEach(phaseKey => {
-                    const phase = tasksByPhase[phaseKey];
-                    const weekGroups = phase.reduce((acc, task) => {
+                    const weekGroups = tasksByPhase[phaseKey].reduce((acc, task) => {
                         (acc[task.week] = acc[task.week] || []).push(task);
                         return acc;
                     }, {});
 
                     const phaseElement = document.createElement('section');
-                    phaseElement.className = 'bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden';
+                    phaseElement.className = 'bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm overflow-hidden';
                     
                     let phaseContentHTML = '';
                     Object.keys(weekGroups).forEach(weekKey => {
                         const weekTasks = weekGroups[weekKey];
                         const weekTasksHTML = weekTasks.map(task => `
-                            <li class="task-item flex items-center p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 transition-colors duration-200 ${task.completed ? 'completed' : ''}">
-                                <input type="checkbox" id="task-${task.id}" data-id="${task.id}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" ${task.completed ? 'checked' : ''}>
-                                <label for="task-${task.id}" class="ml-3 flex-grow text-sm text-gray-700 dark:text-gray-300 cursor-pointer">${task.text}</label>
-                                <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">${task.dueDate}</span>
+                            <li class="task-item flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.99] ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+                                <div class="flex items-center">
+                                    <div class="h-6 w-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center mr-4 transition-all duration-200 ${task.completed ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-gray-500'}">
+                                        ${task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                                    </div>
+                                    <span class="task-text text-sm text-gray-800 dark:text-gray-200">${task.text}</span>
+                                </div>
+                                <span class="text-xs text-gray-400 dark:text-gray-500 font-mono hidden sm:block">${task.dueDate}</span>
+                                <input type="checkbox" id="task-${task.id}" class="hidden" ${task.completed ? 'checked' : ''}>
                             </li>
                         `).join('');
                         
                         phaseContentHTML += `
-                            <div class="mt-2 mb-4">
-                                <h4 class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 rounded-lg">第${weekKey}週</h4>
-                                <ul class="mt-2">
+                            <div class="mb-4">
+                                <h4 class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400">第${weekKey}週</h4>
+                                <ul class="mt-2 space-y-2 px-2">
                                     ${weekTasksHTML}
                                 </ul>
                             </div>`;
@@ -208,17 +209,17 @@
 
                     phaseElement.innerHTML = `
                         <details class="group" ${phaseKey == '1' ? 'open' : ''}>
-                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none bg-gray-50 dark:bg-slate-800/80 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors duration-200">
                                 <div class="flex items-center">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${phaseInfo[phaseKey].icon}"></path></svg>
+                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${phaseInfo[phaseKey].icon}"></path></svg>
                                     <div class="ml-4">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">${phaseInfo[phaseKey].title}</h3>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">${phaseInfo[phaseKey].duration}</p>
+                                        <h3 class="text-md sm:text-lg font-bold text-gray-900 dark:text-white">${phaseInfo[phaseKey].title}</h3>
+                                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">${phaseInfo[phaseKey].duration}</p>
                                     </div>
                                 </div>
                                 <svg class="w-5 h-5 accordion-icon text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </summary>
-                            <div class="p-4 accordion-content">
+                            <div class="p-2 md:p-4 accordion-content">
                                 ${phaseContentHTML}
                             </div>
                         </details>
@@ -230,7 +231,6 @@
                 updateProgress();
             }
 
-            // 4. 進捗の更新
             function updateProgress() {
                 const completedTasks = tasks.filter(task => task.completed).length;
                 const totalTasks = tasks.length;
@@ -240,25 +240,24 @@
                 progressText.textContent = `${percentage}% 完了 (${completedTasks}/${totalTasks})`;
             }
 
-            // 5. イベントリスナーの設定
             function addEventListeners() {
-                taskContainer.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', (e) => {
-                        const taskId = parseInt(e.target.dataset.id, 10);
+                taskContainer.querySelectorAll('.task-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const taskId = parseInt(item.dataset.id, 10);
                         const task = tasks.find(t => t.id === taskId);
                         if (task) {
-                            task.completed = e.target.checked;
+                            task.completed = !task.completed;
                             saveTasks();
-                            renderTasks(); // 親要素を再描画してスタイルを適用
+                            renderTasks();
                         }
                     });
                 });
             }
 
-            // 初期化処理
             loadTasks();
             renderTasks();
         });
     </script>
 </body>
 </html>
+
